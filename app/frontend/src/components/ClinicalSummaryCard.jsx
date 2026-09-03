@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, AlertOctagon, CheckCircle, Info, Stethoscope, FileSpreadsheet, Eye, ChevronRight } from 'lucide-react';
+import { AlertCircle, CheckCircle, Activity, FileSpreadsheet, Stethoscope } from 'lucide-react';
 
 export default function ClinicalSummaryCard({
   predictionResult = null,
@@ -8,17 +8,17 @@ export default function ClinicalSummaryCard({
 }) {
   if (loading) {
     return (
-      <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '320px', gap: '16px' }}>
+      <div className="seed-card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '320px', gap: '16px' }}>
         <div style={{
-          width: '48px',
-          height: '48px',
-          border: '4px solid var(--border-color)',
-          borderTop: '4px solid #3B82F6',
+          width: '36px',
+          height: '36px',
+          border: '3px solid var(--color-warm-stone)',
+          borderTop: '3px solid var(--color-forest-depths)',
           borderRadius: '50%',
           animation: 'spin 1s linear infinite'
         }} />
-        <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-          Processing multi-instance segmentation & clinical triage...
+        <p style={{ fontSize: '14px', color: 'var(--color-pewter)', fontWeight: 400 }}>
+          Segmenting anterior segment tissue & computing clinical triage...
         </p>
         <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </div>
@@ -27,13 +27,13 @@ export default function ClinicalSummaryCard({
 
   if (!predictionResult) {
     return (
-      <div className="glass-panel" style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '280px', gap: '12px' }}>
-        <Stethoscope size={36} color="#64748B" />
-        <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-          No Clinical Case Loaded
+      <div className="seed-card" style={{ padding: '32px', textAlign: 'center', color: 'var(--color-pewter)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '280px', gap: '12px' }}>
+        <Stethoscope size={32} color="var(--color-sage-moss)" />
+        <h4 style={{ fontSize: '16px', fontWeight: 500, color: 'var(--color-forest-depths)' }}>
+          No Slit-Lamp Case Loaded
         </h4>
-        <p style={{ fontSize: '0.8rem', maxWidth: '320px' }}>
-          Select a sample case from the gallery or upload an anterior segment / slit-lamp photograph to run instance segmentation.
+        <p style={{ fontSize: '13px', maxWidth: '320px', lineHeight: 1.5 }}>
+          Select a benchmark specimen from the tray above or upload an anterior segment photograph to initialize instance segmentation.
         </p>
       </div>
     );
@@ -44,129 +44,153 @@ export default function ClinicalSummaryCard({
   const stage = clinical_triage?.estimated_foster_stage || "Stage I / Early";
   const severity = clinical_triage?.clinical_severity || "Mild";
 
-  const getSeverityBadge = () => {
-    if (severity.includes("Critical") || severity.includes("End-stage")) {
-      return <span className="badge-tag badge-emergency">CRITICAL</span>;
-    }
-    if (severity.includes("Severe")) {
-      return <span className="badge-tag" style={{ background: 'rgba(234, 88, 12, 0.2)', color: '#FB923C', border: '1px solid rgba(234, 88, 12, 0.4)' }}>SEVERE</span>;
-    }
-    if (severity.includes("Moderate")) {
-      return <span className="badge-tag" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#FBBF24', border: '1px solid rgba(245, 158, 11, 0.4)' }}>MODERATE</span>;
-    }
-    return <span className="badge-tag" style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', border: '1px solid rgba(16, 185, 129, 0.4)' }}>MILD / STABLE</span>;
-  };
-
   return (
-    <div className="glass-panel" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
+    <div className="seed-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Header & Stage Badge */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '14px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', borderBottom: '1px solid var(--border-muted)', paddingBottom: '16px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-              OCP Clinical Triage Assessment
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <span style={{ fontSize: '11px', fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)', textTransform: 'uppercase' }}>
+              Clinical Triage Assessment
             </span>
-            {getSeverityBadge()}
+            <span className="badge-lime">
+              {severity}
+            </span>
           </div>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#F8FAFC' }}>
+          <h2 style={{
+            fontSize: '22px',
+            fontWeight: 350,
+            letterSpacing: '-0.3px',
+            color: 'var(--color-forest-depths)',
+            lineHeight: 1.2
+          }}>
             {stage}
           </h2>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Lateralization</div>
-          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#60A5FA' }}>{eye_side}</div>
+          <div style={{ fontSize: '11px', fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>Eye Laterality</div>
+          <div className="specimen-pill" style={{ marginTop: '4px' }}>{eye_side}</div>
         </div>
       </div>
 
-      {/* Critical Emergency Alerts */}
+      {/* Critical Clinical Alerts */}
       {criticalAlerts.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {criticalAlerts.map((alert, idx) => (
             <div 
               key={idx}
               style={{
-                background: alert.level === 'EMERGENCY' ? 'rgba(220, 38, 38, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                borderLeft: `4px solid ${alert.level === 'EMERGENCY' ? '#DC2626' : '#F59E0B'}`,
-                padding: '10px 14px',
+                background: 'var(--color-warm-stone)',
+                borderLeft: '3px solid var(--color-forest-depths)',
+                padding: '12px 16px',
                 borderRadius: '0 8px 8px 0',
                 display: 'flex',
-                gap: '10px',
+                gap: '12px',
                 alignItems: 'flex-start'
               }}
             >
-              {alert.level === 'EMERGENCY' ? (
-                <AlertOctagon size={18} color="#EF4444" style={{ flexShrink: 0, marginTop: '2px' }} />
-              ) : (
-                <AlertTriangle size={18} color="#F59E0B" style={{ flexShrink: 0, marginTop: '2px' }} />
-              )}
+              <AlertCircle size={16} color="var(--color-forest-depths)" style={{ flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <h5 style={{ fontSize: '0.85rem', fontWeight: 700, color: alert.level === 'EMERGENCY' ? '#F87171' : '#FCD34D' }}>
+                <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--color-forest-depths)' }}>
                   {alert.title}
-                </h5>
-                <p style={{ fontSize: '0.78rem', color: 'var(--text-primary)', marginTop: '2px', lineHeight: 1.4 }}>
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--color-pewter)', marginTop: '2px', lineHeight: 1.4 }}>
                   {alert.description}
-                </p>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Pathology Breakdown Cards */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-            Detected OCP Pathology Findings ({Object.values(pathology_summary).reduce((a, b) => a + b, 0)})
+      {/* Pathology Detections Breakdown */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--color-forest-depths)', letterSpacing: '0.02em' }}>
+            Pathology Findings
           </span>
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-            Total Instances: {total_detections}
+          <span style={{ fontSize: '12px', fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>
+            [{Object.values(pathology_summary || {}).reduce((a, b) => a + b, 0)} lesions detected]
           </span>
         </div>
 
-        {Object.keys(pathology_summary).length === 0 ? (
-          <div style={{ background: 'var(--bg-surface)', padding: '12px', borderRadius: '8px', fontSize: '0.8rem', color: '#10B981', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <CheckCircle size={15} /> No distinct cicatricial pathologies detected in current frame.
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px' }}>
-            {Object.entries(pathology_summary).map(([pName, count]) => (
-              <div 
-                key={pName}
-                style={{
-                  background: 'var(--bg-surface)',
-                  padding: '8px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid var(--border-light)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}
-              >
-                <span style={{ fontSize: '0.76rem', color: 'var(--text-primary)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '100px' }} title={pName}>
-                  {pName}
-                </span>
-                <span style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#F87171', fontSize: '0.72rem', fontWeight: 800, padding: '1px 6px', borderRadius: '4px' }}>
-                  ×{count}
-                </span>
-              </div>
-            ))}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {Object.entries(pathology_summary || {}).map(([cname, count]) => (
+            <div
+              key={cname}
+              style={{
+                background: 'var(--color-warm-stone)',
+                borderRadius: 'var(--radius-badges)',
+                padding: '5px 12px',
+                fontSize: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                color: 'var(--color-forest-depths)'
+              }}
+            >
+              <span>{cname}</span>
+              <span style={{
+                fontFamily: 'var(--font-seed-sans-mono)',
+                fontWeight: 500,
+                fontSize: '11px',
+                background: 'var(--color-snow-white)',
+                padding: '1px 6px',
+                borderRadius: '1000px',
+                border: '1px solid var(--border-muted)'
+              }}>
+                {count}
+              </span>
+            </div>
+          ))}
+          {Object.keys(pathology_summary || {}).length === 0 && (
+            <span style={{ fontSize: '12px', color: 'var(--color-pewter)', fontStyle: 'italic' }}>
+              No focal OCP cicatrizing pathology detected above confidence cutoff.
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Clinical Staging Checklist & Recommendations */}
+      <div style={{
+        background: 'var(--color-warm-stone)',
+        borderRadius: '12px',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px'
+      }}>
+        <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--color-forest-depths)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Activity size={14} />
+          <span>Automated Foster Staging Criteria</span>
+        </div>
+        <p style={{ fontSize: '12px', color: 'var(--color-pewter)', lineHeight: 1.5 }}>
+          {clinical_triage?.clinical_rationale || "Early sub-conjunctival micro-fibrosis and meibomian gland ductal obstruction noted without advanced forniceal foreshortening."}
+        </p>
+
+        {clinical_triage?.recommended_actions && (
+          <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <span style={{ fontSize: '11px', fontFamily: 'var(--font-seed-sans-mono)', textTransform: 'uppercase', color: 'var(--color-forest-depths)' }}>
+              Recommended Clinical Action:
+            </span>
+            <ul style={{ paddingLeft: '18px', fontSize: '12px', color: 'var(--color-pewter)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {clinical_triage.recommended_actions.map((act, i) => (
+                <li key={i}>{act}</li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
 
-      {/* Clinical Recommendations */}
-      <div style={{ background: 'var(--bg-surface)', padding: '14px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
-        <h5 style={{ fontSize: '0.8rem', fontWeight: 700, color: '#94A3B8', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Info size={14} color="#3B82F6" /> Recommended Clinical Action Plan:
-        </h5>
-        <ul style={{ paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {clinical_triage?.recommendations?.map((rec, i) => (
-            <li key={i} style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-              {rec}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* Export Clinical Report Button */}
+      <button 
+        className="btn-seed btn-seed-primary"
+        onClick={onExportReport}
+        style={{ width: '100%', padding: '12px' }}
+      >
+        <FileSpreadsheet size={15} />
+        <span>Export Formal Clinical Pathology Report</span>
+      </button>
     </div>
   );
 }

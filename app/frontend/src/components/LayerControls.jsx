@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, Sliders, CheckSquare, Square, Eye, EyeOff, ShieldAlert, Sparkles } from 'lucide-react';
+import { Sliders, Eye, EyeOff } from 'lucide-react';
 
 export default function LayerControls({
   categories = [],
@@ -29,28 +29,34 @@ export default function LayerControls({
   const allAnatomyVisible = anatomyClasses.every(c => visibleCategories[c.id] !== false);
 
   return (
-    <div className="glass-panel" style={{ padding: '20px', height: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div className="seed-card" style={{ padding: '24px', height: '100%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Panel Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-muted)', paddingBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Sliders size={18} color="#3B82F6" />
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 700 }}>Visual & Layer Controls</h3>
+          <Sliders size={16} color="var(--color-forest-depths)" />
+          <h3 style={{ fontSize: '15px', fontWeight: 500, color: 'var(--color-forest-depths)' }}>
+            Specimen Layer Controls
+          </h3>
         </div>
-        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>23 Classes</span>
+        <span style={{ fontSize: '11px', fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>
+          23 Categories
+        </span>
       </div>
 
       {/* Visual Adjustments Sliders */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', background: 'var(--bg-surface)', padding: '14px', borderRadius: 'var(--radius-md)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', background: 'var(--color-warm-stone)', padding: '16px', borderRadius: '12px' }}>
         {/* Confidence Threshold */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '6px' }}>
-            <span style={{ color: 'var(--text-secondary)' }}>Confidence Cutoff</span>
-            <span style={{ fontWeight: 700, color: '#3B82F6' }}>{(confidence * 100).toFixed(0)}%</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
+            <span style={{ color: 'var(--color-pewter)' }}>Confidence Cutoff</span>
+            <span style={{ fontFamily: 'var(--font-seed-sans-mono)', fontWeight: 500, color: 'var(--color-forest-depths)' }}>
+              {(confidence * 100).toFixed(0)}%
+            </span>
           </div>
           <input 
             type="range" 
-            min="0.10" 
-            max="0.90" 
+            min="0.05" 
+            max="0.80" 
             step="0.05"
             value={confidence} 
             onChange={(e) => setConfidence(parseFloat(e.target.value))}
@@ -59,9 +65,11 @@ export default function LayerControls({
 
         {/* Mask Opacity */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '6px' }}>
-            <span style={{ color: 'var(--text-secondary)' }}>Segmentation Opacity</span>
-            <span style={{ fontWeight: 700, color: '#10B981' }}>{(opacity * 100).toFixed(0)}%</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '6px' }}>
+            <span style={{ color: 'var(--color-pewter)' }}>Segmentation Opacity</span>
+            <span style={{ fontFamily: 'var(--font-seed-sans-mono)', fontWeight: 500, color: 'var(--color-forest-depths)' }}>
+              {(opacity * 100).toFixed(0)}%
+            </span>
           </div>
           <input 
             type="range" 
@@ -74,93 +82,83 @@ export default function LayerControls({
         </div>
 
         {/* Contrast / Slit Beam Enhancer */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Brightness</span>
-              <span>{brightness}%</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+              <span style={{ color: 'var(--color-pewter)' }}>Brightness</span>
+              <span style={{ fontFamily: 'var(--font-seed-sans-mono)' }}>{brightness}%</span>
             </div>
             <input 
               type="range" 
-              min="50" 
-              max="180" 
+              min="60" 
+              max="160" 
               value={brightness} 
               onChange={(e) => setBrightness(parseInt(e.target.value))}
             />
           </div>
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: '4px' }}>
-              <span style={{ color: 'var(--text-secondary)' }}>Contrast</span>
-              <span>{contrast}%</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
+              <span style={{ color: 'var(--color-pewter)' }}>Contrast</span>
+              <span style={{ fontFamily: 'var(--font-seed-sans-mono)' }}>{contrast}%</span>
             </div>
             <input 
               type="range" 
-              min="50" 
-              max="200" 
+              min="60" 
+              max="180" 
               value={contrast} 
               onChange={(e) => setContrast(parseInt(e.target.value))}
             />
           </div>
         </div>
-
-        {/* Display Element Toggles */}
-        <div style={{ display: 'flex', gap: '8px', paddingTop: '6px', borderTop: '1px solid var(--border-light)' }}>
-          <button 
-            className={`btn ${showPolygons ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setShowPolygons(!showPolygons)}
-            style={{ flex: 1, fontSize: '0.72rem', padding: '5px' }}
-          >
-            Polygons
-          </button>
-          <button 
-            className={`btn ${showBBoxes ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setShowBBoxes(!showBBoxes)}
-            style={{ flex: 1, fontSize: '0.72rem', padding: '5px' }}
-          >
-            BBoxes
-          </button>
-          <button 
-            className={`btn ${showLabels ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setShowLabels(!showLabels)}
-            style={{ flex: 1, fontSize: '0.72rem', padding: '5px' }}
-          >
-            Labels
-          </button>
-        </div>
       </div>
 
-      {/* Category Layers List */}
-      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px', paddingRight: '4px' }}>
-        {/* 1. OCP Pathology Layer Group */}
+      {/* Render Mode Pills */}
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button
+          className={`btn-seed ${showPolygons ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
+          onClick={() => setShowPolygons(!showPolygons)}
+          style={{ flex: 1, padding: '7px 10px', fontSize: '12px' }}
+        >
+          Polygons
+        </button>
+        <button
+          className={`btn-seed ${showBBoxes ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
+          onClick={() => setShowBBoxes(!showBBoxes)}
+          style={{ flex: 1, padding: '7px 10px', fontSize: '12px' }}
+        >
+          Boxes
+        </button>
+        <button
+          className={`btn-seed ${showLabels ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
+          onClick={() => setShowLabels(!showLabels)}
+          style={{ flex: 1, padding: '7px 10px', fontSize: '12px' }}
+        >
+          Labels
+        </button>
+      </div>
+
+      {/* Categories Layer Toggles */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', flex: 1, paddingRight: '4px' }}>
+        
+        {/* Pathology Group */}
         <div>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between', 
-            background: 'rgba(239, 68, 68, 0.1)', 
-            padding: '8px 12px', 
-            borderRadius: '8px',
-            border: '1px solid rgba(239, 68, 68, 0.25)',
-            marginBottom: '8px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <ShieldAlert size={16} color="#EF4444" />
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#F87171' }}>
-                OCP Pathology Layer (13)
-              </span>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--color-forest-depths)' }}>
+              OCP Pathology (13)
+            </span>
             <button
               onClick={() => onToggleGroup('pathology', !allPathologyVisible)}
-              style={{ background: 'none', border: 'none', color: '#F87171', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              style={{ background: 'none', border: 'none', fontSize: '11px', color: 'var(--color-pewter)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
             >
-              {allPathologyVisible ? <Eye size={15} /> : <EyeOff size={15} />}
+              {allPathologyVisible ? <EyeOff size={12} /> : <Eye size={12} />}
+              <span>{allPathologyVisible ? 'Hide All' : 'Show All'}</span>
             </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {pathologyClasses.map(cat => {
               const isVisible = visibleCategories[cat.id] !== false;
-              const col = palette[cat.id]?.color || '#EF4444';
+              const color = palette[cat.id]?.color || '#1c3a13';
               return (
                 <div
                   key={cat.id}
@@ -169,56 +167,48 @@ export default function LayerControls({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '5px 10px',
-                    borderRadius: '6px',
-                    background: isVisible ? 'var(--bg-surface)' : 'transparent',
-                    opacity: isVisible ? 1 : 0.45,
+                    padding: '6px 10px',
+                    borderRadius: '8px',
                     cursor: 'pointer',
-                    fontSize: '0.78rem',
+                    background: isVisible ? 'var(--color-snow-white)' : 'var(--color-warm-stone)',
+                    border: '1px solid',
+                    borderColor: isVisible ? 'var(--border-muted)' : 'transparent',
+                    opacity: isVisible ? 1 : 0.5,
                     transition: 'all 0.15s ease'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '10px', height: '10px', borderRadius: '3px', backgroundColor: col }} />
-                    <span style={{ color: 'var(--text-primary)' }}>{cat.name}</span>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: color }} />
+                    <span style={{ fontSize: '12px', color: 'var(--color-forest-depths)' }}>{cat.name}</span>
                   </div>
-                  {isVisible ? <CheckSquare size={13} color="#EF4444" /> : <Square size={13} color="var(--text-muted)" />}
+                  <span style={{ fontSize: '10px', fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>
+                    #{cat.id}
+                  </span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* 2. Eye Anatomy Layer Group */}
+        {/* Anatomy Group */}
         <div>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between', 
-            background: 'rgba(16, 185, 129, 0.1)', 
-            padding: '8px 12px', 
-            borderRadius: '8px',
-            border: '1px solid rgba(16, 185, 129, 0.25)',
-            marginBottom: '8px'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Layers size={16} color="#10B981" />
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#34D399' }}>
-                Eye Anatomy Layer (10)
-              </span>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--color-forest-depths)' }}>
+              Anatomy Landmarks (10)
+            </span>
             <button
               onClick={() => onToggleGroup('anatomy', !allAnatomyVisible)}
-              style={{ background: 'none', border: 'none', color: '#34D399', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              style={{ background: 'none', border: 'none', fontSize: '11px', color: 'var(--color-pewter)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
             >
-              {allAnatomyVisible ? <Eye size={15} /> : <EyeOff size={15} />}
+              {allAnatomyVisible ? <EyeOff size={12} /> : <Eye size={12} />}
+              <span>{allAnatomyVisible ? 'Hide All' : 'Show All'}</span>
             </button>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {anatomyClasses.map(cat => {
               const isVisible = visibleCategories[cat.id] !== false;
-              const col = palette[cat.id]?.color || '#10B981';
+              const color = palette[cat.id]?.color || '#757c5d';
               return (
                 <div
                   key={cat.id}
@@ -227,25 +217,29 @@ export default function LayerControls({
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '5px 10px',
-                    borderRadius: '6px',
-                    background: isVisible ? 'var(--bg-surface)' : 'transparent',
-                    opacity: isVisible ? 1 : 0.45,
+                    padding: '6px 10px',
+                    borderRadius: '8px',
                     cursor: 'pointer',
-                    fontSize: '0.78rem',
+                    background: isVisible ? 'var(--color-snow-white)' : 'var(--color-warm-stone)',
+                    border: '1px solid',
+                    borderColor: isVisible ? 'var(--border-muted)' : 'transparent',
+                    opacity: isVisible ? 1 : 0.5,
                     transition: 'all 0.15s ease'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{ width: '10px', height: '10px', borderRadius: '3px', backgroundColor: col }} />
-                    <span style={{ color: 'var(--text-primary)' }}>{cat.name}</span>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: color }} />
+                    <span style={{ fontSize: '12px', color: 'var(--color-forest-depths)' }}>{cat.name}</span>
                   </div>
-                  {isVisible ? <CheckSquare size={13} color="#10B981" /> : <Square size={13} color="var(--text-muted)" />}
+                  <span style={{ fontSize: '10px', fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>
+                    #{cat.id}
+                  </span>
                 </div>
               );
             })}
           </div>
         </div>
+
       </div>
     </div>
   );

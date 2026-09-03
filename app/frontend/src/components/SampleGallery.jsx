@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Upload, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { Upload, Microscope } from 'lucide-react';
 
 export default function SampleGallery({
   samples = [],
@@ -17,14 +17,29 @@ export default function SampleGallery({
   };
 
   return (
-    <div className="glass-panel" style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+    <div className="seed-card" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {/* Tray Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <ImageIcon size={18} color="#3B82F6" />
-          <h3 style={{ fontSize: '0.92rem', fontWeight: 700 }}>Clinical Slit-Lamp Case Selector</h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Microscope size={18} color="var(--color-forest-depths)" />
+          <span style={{
+            fontSize: '14px',
+            fontWeight: 500,
+            letterSpacing: '-0.1px',
+            color: 'var(--color-forest-depths)'
+          }}>
+            Clinical Slit-Lamp Specimen Tray
+          </span>
+          <span style={{
+            fontSize: '11px',
+            fontFamily: 'var(--font-seed-sans-mono)',
+            color: 'var(--color-pewter)'
+          }}>
+            [N = {samples.length} Benchmark Cases]
+          </span>
         </div>
 
-        {/* Upload Button */}
+        {/* Upload Custom Photograph */}
         <div>
           <input 
             type="file" 
@@ -34,21 +49,22 @@ export default function SampleGallery({
             style={{ display: 'none' }} 
           />
           <button 
-            className="btn btn-primary"
+            className="btn-seed btn-seed-inverted"
             onClick={() => fileInputRef.current?.click()}
-            style={{ fontSize: '0.78rem', padding: '6px 12px' }}
+            style={{ padding: '6px 14px', fontSize: '12px' }}
           >
-            <Upload size={14} /> Upload Custom Photo
+            <Upload size={13} />
+            <span>Upload Slit-Lamp Photograph</span>
           </button>
         </div>
       </div>
 
-      {/* Horizontal Carousel of Samples */}
+      {/* Horizontal Carousel of Laboratory Specimens */}
       <div style={{
         display: 'flex',
         gap: '12px',
         overflowX: 'auto',
-        paddingBottom: '8px'
+        paddingBottom: '6px'
       }}>
         {samples.map((sample) => {
           const isSelected = selectedSample?.filename === sample.filename;
@@ -58,19 +74,26 @@ export default function SampleGallery({
               onClick={() => onSelectSample(sample)}
               style={{
                 flexShrink: 0,
-                width: '140px',
-                background: isSelected ? 'rgba(37, 99, 235, 0.2)' : 'var(--bg-surface)',
-                border: isSelected ? '2px solid #3B82F6' : '1px solid var(--border-light)',
-                borderRadius: 'var(--radius-md)',
+                width: '148px',
+                background: isSelected ? 'var(--color-snow-white)' : 'var(--color-warm-stone)',
+                border: isSelected ? '1.5px solid var(--color-forest-depths)' : '1px solid transparent',
+                borderRadius: 'var(--radius-cards)',
                 padding: '8px',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
+                transition: 'all 0.15s ease',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '6px'
+                gap: '8px'
               }}
             >
-              <div style={{ width: '100%', height: '80px', borderRadius: '6px', overflow: 'hidden', backgroundColor: '#000' }}>
+              {/* Specimen Thumbnail under laboratory glass */}
+              <div style={{
+                width: '100%',
+                height: '84px',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                backgroundColor: 'var(--color-forest-depths)'
+              }}>
                 <img 
                   src={sample.thumbnail_url} 
                   alt={sample.filename} 
@@ -78,13 +101,33 @@ export default function SampleGallery({
                   loading="lazy"
                 />
               </div>
-              <div>
-                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: isSelected ? '#60A5FA' : 'var(--text-primary)' }}>
-                  Case #{sample.id}
+
+              {/* Specimen Labels */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 2px' }}>
+                <div>
+                  <div style={{
+                    fontSize: '12px',
+                    fontFamily: 'var(--font-seed-sans-mono)',
+                    fontWeight: 500,
+                    color: 'var(--color-forest-depths)'
+                  }}>
+                    Case #{sample.id}
+                  </div>
+                  <div style={{
+                    fontSize: '11px',
+                    color: 'var(--color-pewter)'
+                  }}>
+                    {sample.eye_side}
+                  </div>
                 </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
-                  {sample.eye_side}
-                </div>
+                {isSelected && (
+                  <span style={{
+                    width: '7px',
+                    height: '7px',
+                    borderRadius: '50%',
+                    background: 'var(--color-forest-depths)'
+                  }} />
+                )}
               </div>
             </div>
           );

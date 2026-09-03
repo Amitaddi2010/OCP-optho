@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Header from './components/Header';
+import MenuBar from './components/MenuBar';
 import SegmentationCanvas from './components/SegmentationCanvas';
-import LayerControls from './components/LayerControls';
-import ClinicalSummaryCard from './components/ClinicalSummaryCard';
-import SampleGallery from './components/SampleGallery';
+import ExplainabilityPanel from './components/ExplainabilityPanel';
 import PublicationMetricsModal from './components/PublicationMetricsModal';
 
 export default function App() {
@@ -16,7 +14,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
-  // Layer & Canvas controls
+  // Optical & Layer Controls (managed through MenuBar)
   const [visibleCategories, setVisibleCategories] = useState({});
   const [opacity, setOpacity] = useState(0.45);
   const [brightness, setBrightness] = useState(100);
@@ -25,12 +23,16 @@ export default function App() {
   const [showPolygons, setShowPolygons] = useState(true);
   const [showBBoxes, setShowBBoxes] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
-  const [hoveredDetId, setHoveredDetId] = useState(null);
+  const [xaiMode, setXaiMode] = useState('segmentation'); // 'segmentation' or 'saliency'
   
-  // Modals
+  // Interactive Hover Probe & Feature Attributions
+  const [hoveredDetId, setHoveredDetId] = useState(null);
+  const [hoveredFeature, setHoveredFeature] = useState(null);
+  
+  // Audit Modal
   const [metricsModalOpen, setMetricsModalOpen] = useState(false);
 
-  // Initialize
+  // Initialize Data
   useEffect(() => {
     fetch('/api/info')
       .then(res => res.json())
@@ -52,8 +54,7 @@ export default function App() {
 
   const handleSelectSample = (sample) => {
     setSelectedSample(sample);
-    const imgUrl = sample.thumbnail_url;
-    setCurrentImageSrc(imgUrl);
+    setCurrentImageSrc(sample.thumbnail_url);
     runInference({ sample_filename: sample.filename });
   };
 
@@ -97,7 +98,6 @@ export default function App() {
     }
   };
 
-  // Trigger re-inference when confidence threshold changes significantly
   useEffect(() => {
     if (selectedSample) {
       runInference({ sample_filename: selectedSample.filename });
@@ -126,112 +126,94 @@ export default function App() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
-      {/* Top Navigation */}
-      <Header 
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--surface-canvas)' }}>
+      {/* Top Clinical Menu Bar */}
+      <MenuBar 
+        samples={samples}
+        selectedSample={selectedSample}
+        onSelectSample={handleSelectSample}
+        onFileUpload={handleFileUpload}
+        categories={modelInfo?.categories || []}
+        visibleCategories={visibleCategories}
+        onToggleCategory={handleToggleCategory}
+        onToggleGroup={handleToggleGroup}
+        opacity={opacity}
+        setOpacity={setOpacity}
+        brightness={brightness}
+        setBrightness={setBrightness}
+        contrast={contrast}
+        setContrast={setContrast}
+        confidence={confidence}
+        setConfidence={setConfidence}
+        xaiMode={xaiMode}
+        setXaiMode={setXaiMode}
         onOpenMetrics={() => setMetricsModalOpen(true)}
         onExportReport={handleExportReport}
-        resultsAvailable={!!predictionResult}
+        palette={modelInfo?.palette || {}}
       />
 
-      {/* Main Workspace Layout */}
+      {/* Main Clinical Dashboard — Exactly 2 Sections */}
       <main style={{
         flex: 1,
-        padding: '24px',
+        padding: '24px 32px',
         maxWidth: '1720px',
         margin: '0 auto',
         width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px'
+        display: 'grid',
+        gridTemplateColumns: '1.45fr 1fr',
+        gap: '24px',
+        alignItems: 'start'
       }}>
-        {/* Sample Case Selector Carousel */}
-        <SampleGallery 
-          samples={samples}
-          selectedSample={selectedSample}
-          onSelectSample={handleSelectSample}
-          onFileUpload={handleFileUpload}
-        />
+        {/* SECTION 1: Specimen Viewport & Diagnostic Canvas (Left) */}
+        <section style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <SegmentationCanvas 
+            imageSrc={currentImageSrc}
+            detections={predictionResult?.detections || []}
+            visibleCategories={visibleCategories}
+            opacity={opacity}
+            brightness={brightness}
+            contrast={contrast}
+            showPolygons={showPolygons}
+            showBBoxes={showBBoxes}
+            showLabels={showLabels}
+            xaiMode={xaiMode}
+            hoveredFeature={hoveredFeature}
+            hoveredDetId={hoveredDetId}
+            onHoverDetection={setHoveredDetId}
+          />
 
-        {/* 3-Column Interactive Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '290px 1fr 360px',
-          gap: '20px',
-          alignItems: 'start'
-        }}>
-          {/* Left Column: Layer Controls */}
-          <div style={{ height: '700px' }}>
-            <LayerControls 
-              categories={modelInfo?.categories || []}
-              visibleCategories={visibleCategories}
-              onToggleCategory={handleToggleCategory}
-              onToggleGroup={handleToggleGroup}
-              opacity={opacity}
-              setOpacity={setOpacity}
-              brightness={brightness}
-              setBrightness={setBrightness}
-              contrast={contrast}
-              setContrast={setContrast}
-              confidence={confidence}
-              setConfidence={setConfidence}
-              showPolygons={showPolygons}
-              setShowPolygons={setShowPolygons}
-              showBBoxes={showBBoxes}
-              setShowBBoxes={setShowBBoxes}
-              showLabels={showLabels}
-              setShowLabels={setShowLabels}
-              palette={modelInfo?.palette || {}}
-            />
-          </div>
-
-          {/* Center Column: Interactive Canvas */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <SegmentationCanvas 
-              imageSrc={currentImageSrc}
-              detections={predictionResult?.detections || []}
-              visibleCategories={visibleCategories}
-              opacity={opacity}
-              brightness={brightness}
-              contrast={contrast}
-              showPolygons={showPolygons}
-              showBBoxes={showBBoxes}
-              showLabels={showLabels}
-              hoveredDetId={hoveredDetId}
-              onHoverDetection={setHoveredDetId}
-            />
-
-            {/* Canvas Status & Legend Strip */}
-            <div className="glass-panel" style={{ padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.8rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--pathology-color)' }} />
-                  <span style={{ fontWeight: 600, color: '#F87171' }}>OCP Pathology Findings</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <div style={{ width: '12px', height: '12px', borderRadius: '3px', background: 'var(--anatomy-color)' }} />
-                  <span style={{ fontWeight: 600, color: '#34D399' }}>Harmonized Eye Anatomy</span>
-                </div>
+          {/* Section 1 Footer Status Bar */}
+          <div className="seed-card" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-forest-depths)' }} />
+                <span style={{ fontWeight: 500, color: 'var(--color-forest-depths)' }}>OCP Pathology Striae</span>
               </div>
-
-              <div style={{ color: 'var(--text-muted)' }}>
-                Active Detections: <strong style={{ color: '#FFFFFF' }}>{predictionResult?.total_detections || 0}</strong>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-sage-moss)' }} />
+                <span style={{ fontWeight: 500, color: 'var(--color-forest-depths)' }}>Anatomical Landmarks</span>
               </div>
             </div>
-          </div>
 
-          {/* Right Column: Clinical Triage & Staging Card */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <ClinicalSummaryCard 
-              predictionResult={predictionResult}
-              loading={loading}
-              onExportReport={handleExportReport}
-            />
+            <div style={{ fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>
+              Active Delineations: <strong style={{ color: 'var(--color-forest-depths)' }}>{predictionResult?.total_detections || 0}</strong>
+            </div>
           </div>
-        </div>
+        </section>
+
+        {/* SECTION 2: AI Explainability & Clinical Decision Support (Right) */}
+        <section>
+          <ExplainabilityPanel 
+            predictionResult={predictionResult}
+            loading={loading}
+            onHoverFeature={setHoveredFeature}
+            hoveredFeature={hoveredFeature}
+            onExportReport={handleExportReport}
+          />
+        </section>
       </main>
 
-      {/* Publication Metrics Modal */}
+      {/* Publication Metrics & Cryptographic Audit Modal */}
       <PublicationMetricsModal 
         isOpen={metricsModalOpen}
         onClose={() => setMetricsModalOpen(false)}
