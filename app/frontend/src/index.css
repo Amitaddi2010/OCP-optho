@@ -292,3 +292,90 @@ input[type=range]::-moz-range-thumb {
   cursor: pointer;
   border: 2px solid var(--color-snow-white);
 }
+
+/* ==============================================================================
+   DRIBBLE MICRO-INTERACTION SUITE
+   ============================================================================== */
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(211, 250, 153, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(211, 250, 153, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(211, 250, 153, 0); }
+}
+
+@keyframes micro-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+.micro-card-interactive {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  will-change: transform;
+}
+.micro-card-interactive:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-forest-depths) !important;
+}
+
+.micro-pill-interactive {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, color 0.15s ease;
+}
+.micro-pill-interactive:hover {
+  transform: translateY(-2px) scale(1.02);
+}
+.micro-pill-interactive:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+.micro-pulse-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--color-forest-depths);
+}
+.micro-pulse-dot::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border-radius: 50%;
+  background: rgba(211, 250, 153, 0.6);
+  animation: pulse-ring 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* Split Curtain Drag Slider Handle */
+.curtain-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--color-snow-white);
+  cursor: ew-resize;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.curtain-handle-knob {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-forest-depths);
+  border: 2px solid var(--color-snow-white);
+  color: var(--color-snow-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  transition: transform 0.15s ease;
+}
+.curtain-handle:hover .curtain-handle-knob {
+  transform: scale(1.15);
+  background: var(--color-lime-pulse);
+  color: var(--color-forest-depths);
+}
+
