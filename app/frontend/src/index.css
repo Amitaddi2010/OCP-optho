@@ -379,3 +379,101 @@ input[type=range]::-moz-range-thumb {
   color: var(--color-forest-depths);
 }
 
+/* ==============================================================================
+   RESPONSIVE DESIGN SYSTEM — ALL DEVICE BREAKPOINTS
+   ============================================================================== */
+
+/* Responsive Dashboard Layout */
+.responsive-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+  max-width: 1720px;
+  margin: 0 auto;
+  padding: 24px 32px;
+}
+
+/* Responsive Landing Page Hero */
+.responsive-landing-hero {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 48px;
+  align-items: center;
+  width: 100%;
+  max-width: 1580px;
+  margin: 0 auto;
+  padding: 56px 40px 48px 40px;
+}
+
+/* Responsive Evidence Matrix */
+.responsive-evidence-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 32px;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* Tablet & Mobile Breakpoints (< 1024px) */
+@media screen and (max-width: 1024px) {
+  .responsive-dashboard-grid {
+    grid-template-columns: 1fr !important;
+    padding: 16px 20px !important;
+    gap: 20px !important;
+  }
+
+  .responsive-landing-hero {
+    grid-template-columns: 1fr !important;
+    padding: 36px 20px 32px 20px !important;
+    gap: 32px !important;
+  }
+
+  .responsive-evidence-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+}
+
+/* Mobile Breakpoints (< 768px) */
+@media screen and (max-width: 768px) {
+  .responsive-dashboard-grid {
+    padding: 12px 14px !important;
+    gap: 16px !important;
+  }
+
+  .responsive-landing-hero {
+    padding: 24px 14px !important;
+    gap: 24px !important;
+  }
+
+  /* Responsive Menubar Header */
+  .seed-menubar-nav {
+    padding: 10px 14px !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  .seed-menubar-actions {
+    width: 100% !important;
+    justify-content: space-between !important;
+    overflow-x: auto !important;
+    padding-bottom: 4px !important;
+  }
+
+  /* Fluid typography */
+  h1 {
+    font-size: clamp(28px, 7vw, 44px) !important;
+  }
+
+  h2 {
+    font-size: clamp(22px, 5vw, 32px) !important;
+  }
+
+  .seed-card {
+    padding: 16px !important;
+  }
+}
+
+

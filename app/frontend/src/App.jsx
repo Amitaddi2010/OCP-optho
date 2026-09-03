@@ -20,13 +20,14 @@ export default function App() {
   // Optical & Layer Controls (managed through MenuBar)
   const [visibleCategories, setVisibleCategories] = useState({});
   const [opacity, setOpacity] = useState(0.45);
+  const [gradcamOpacity, setGradcamOpacity] = useState(0.75);
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(105);
   const [confidence, setConfidence] = useState(0.20);
   const [showPolygons, setShowPolygons] = useState(true);
   const [showBBoxes, setShowBBoxes] = useState(false);
   const [showLabels, setShowLabels] = useState(true);
-  const [xaiMode, setXaiMode] = useState('segmentation'); // 'segmentation' or 'saliency'
+  const [xaiMode, setXaiMode] = useState('segmentation'); // 'segmentation', 'gradcam', 'composite'
   
   // Interactive Hover Probe & Feature Attributions
   const [hoveredDetId, setHoveredDetId] = useState(null);
@@ -163,6 +164,8 @@ export default function App() {
             onToggleGroup={handleToggleGroup}
             opacity={opacity}
             setOpacity={setOpacity}
+            gradcamOpacity={gradcamOpacity}
+            setGradcamOpacity={setGradcamOpacity}
             brightness={brightness}
             setBrightness={setBrightness}
             contrast={contrast}
@@ -176,25 +179,17 @@ export default function App() {
             palette={modelInfo?.palette || {}}
           />
 
-          {/* Main Clinical Dashboard — Exactly 2 Sections */}
-          <main style={{
-            flex: 1,
-            padding: '24px 32px',
-            maxWidth: '1720px',
-            margin: '0 auto',
-            width: '100%',
-            display: 'grid',
-            gridTemplateColumns: '1.45fr 1fr',
-            gap: '24px',
-            alignItems: 'start'
-          }}>
-            {/* SECTION 1: Specimen Viewport & Diagnostic Canvas (Left) */}
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {/* Main Clinical Dashboard — Exactly 2 Sections (Responsive Grid) */}
+          <main className="responsive-dashboard-grid">
+            {/* SECTION 1: Specimen Viewport & Diagnostic Canvas (Left / Top on Mobile) */}
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
               <SegmentationCanvas 
                 imageSrc={currentImageSrc}
                 detections={predictionResult?.detections || []}
+                gradcamUrl={predictionResult?.gradcam_heatmap_url}
                 visibleCategories={visibleCategories}
                 opacity={opacity}
+                gradcamOpacity={gradcamOpacity}
                 brightness={brightness}
                 contrast={contrast}
                 showPolygons={showPolygons}
@@ -207,8 +202,8 @@ export default function App() {
               />
 
               {/* Section 1 Footer Status Bar */}
-              <div className="seed-card" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+              <div className="seed-card" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-forest-depths)' }} />
                     <span style={{ fontWeight: 500, color: 'var(--color-forest-depths)' }}>OCP Pathology Striae</span>
@@ -217,6 +212,12 @@ export default function App() {
                     <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-sage-moss)' }} />
                     <span style={{ fontWeight: 500, color: 'var(--color-forest-depths)' }}>Anatomical Landmarks</span>
                   </div>
+                  {xaiMode !== 'segmentation' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#dc2626' }} />
+                      <span style={{ fontWeight: 600, color: '#dc2626' }}>Grad-CAM Thermal Foci</span>
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>
@@ -225,11 +226,15 @@ export default function App() {
               </div>
             </section>
 
-            {/* SECTION 2: AI Explainability & Clinical Decision Support (Right) */}
-            <section>
+            {/* SECTION 2: AI Explainability & Clinical Decision Support (Right / Bottom on Mobile) */}
+            <section style={{ width: '100%' }}>
               <ExplainabilityPanel 
                 predictionResult={predictionResult}
                 loading={loading}
+                xaiMode={xaiMode}
+                setXaiMode={setXaiMode}
+                gradcamOpacity={gradcamOpacity}
+                setGradcamOpacity={setGradcamOpacity}
                 onHoverFeature={setHoveredFeature}
                 hoveredFeature={hoveredFeature}
                 onExportReport={handleExportReport}

@@ -1,17 +1,19 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { ZoomIn, ZoomOut, RotateCcw, Sparkles, Layers, Box, Tag } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Sparkles, Layers, Info } from 'lucide-react';
 
 export default function SegmentationCanvas({
   imageSrc,
   detections = [],
+  gradcamUrl = null,
   visibleCategories = {},
   opacity = 0.45,
+  gradcamOpacity = 0.75,
   brightness = 100,
   contrast = 100,
   showPolygons = true,
   showBBoxes = true,
   showLabels = true,
-  xaiMode = 'segmentation', // 'segmentation' or 'saliency'
+  xaiMode = 'segmentation', // 'segmentation', 'gradcam', 'composite'
   hoveredFeature = null,
   hoveredDetId = null,
   onHoverDetection = () => {}
@@ -25,9 +27,27 @@ export default function SegmentationCanvas({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
+  // Preloaded Grad-CAM Image element
+  const [gradcamImg, setGradcamImg] = useState(null);
+
   // Hover Probe Tooltip State
   const [probeData, setProbeData] = useState(null);
 
+  // Preload Grad-CAM image when URL changes
+  useEffect(() => {
+    if (!gradcamUrl) {
+      setGradcamImg(null);
+      return;
+    }
+    const gImg = new Image();
+    gImg.crossOrigin = "anonymous";
+    gImg.src = gradcamUrl;
+    gImg.onload = () => {
+      setGradcamImg(gImg);
+    };
+  }, [gradcamUrl]);
+
+  // Load and render scene
   useEffect(() => {
     if (!imageSrc) return;
     const img = new Image();
@@ -36,13 +56,15 @@ export default function SegmentationCanvas({
     img.onload = () => {
       setNaturalSize({ width: img.naturalWidth, height: img.naturalHeight });
       setImageLoaded(true);
-      renderScene(img);
+      renderScene(img, gradcamImg);
     };
   }, [
     imageSrc, 
+    gradcamImg,
     detections, 
     visibleCategories, 
     opacity, 
+    gradcamOpacity,
     brightness, 
     contrast, 
     showPolygons, 
@@ -55,7 +77,7 @@ export default function SegmentationCanvas({
     pan
   ]);
 
-  const renderScene = (img) => {
+  const renderScene = (img, gImg) => {
     const canvas = canvasRef.current;
     if (!canvas || !img) return;
 
@@ -66,71 +88,72 @@ export default function SegmentationCanvas({
     canvas.width = width;
     canvas.height = height;
 
-    // Apply brightness and contrast filters
+    // 1. Draw Base Slit-Lamp Image with contrast & brightness
     ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
     ctx.drawImage(img, 0, 0, width, height);
     ctx.filter = 'none';
 
-    // Draw Segmentation or Saliency Overlays
-    detections.forEach((det) => {
-      if (visibleCategories[det.class_id] === false) return;
+    // 2. Draw Authentic Grad-CAM Thermal Heatmap Overlay
+    if ((xaiMode === 'gradcam' || xaiMode === 'composite') && gImg) {
+      ctx.save();
+      ctx.globalAlpha = gradcamOpacity;
+      ctx.drawImage(gImg, 0, 0, width, height);
+      ctx.restore();
+    }
 
-      const isHovered = hoveredDetId === det.id || (hoveredFeature && det.class_name.toLowerCase().includes(hoveredFeature.toLowerCase()));
-      const poly = det.polygon;
-      let color = det.color || '#1c3a13';
+    // 3. Draw Segmentation Polygons & Boxes (if in segmentation or composite mode)
+    if (xaiMode === 'segmentation' || xaiMode === 'composite') {
+      detections.forEach((det) => {
+        if (visibleCategories[det.class_id] === false) return;
 
-      if (xaiMode === 'saliency') {
-        // In Saliency mode, pathology glows in high-attention amber/gold
-        color = det.type.includes('OCP') || det.type.includes('Critical') ? '#f59e0b' : '#698e79';
-      }
+        const isHovered = hoveredDetId === det.id || (hoveredFeature && det.class_name.toLowerCase().includes(hoveredFeature.toLowerCase()));
+        const poly = det.polygon;
+        const color = det.color || '#1c3a13';
 
-      // 1. Draw Polygon Fill
-      if (showPolygons && poly && poly.length >= 3) {
-        ctx.beginPath();
-        ctx.moveTo(poly[0][0], poly[0][1]);
-        for (let i = 1; i < poly.length; i++) {
-          ctx.lineTo(poly[i][0], poly[i][1]);
+        // Draw Polygon Fill
+        if (showPolygons && poly && poly.length >= 3) {
+          ctx.beginPath();
+          ctx.moveTo(poly[0][0], poly[0][1]);
+          for (let i = 1; i < poly.length; i++) {
+            ctx.lineTo(poly[i][0], poly[i][1]);
+          }
+          ctx.closePath();
+
+          const currentAlpha = isHovered ? Math.min(0.85, opacity + 0.3) : opacity;
+          ctx.fillStyle = hexToRgba(color, currentAlpha);
+          ctx.fill();
+
+          ctx.strokeStyle = color;
+          ctx.lineWidth = isHovered ? 4 : 1.5;
+          ctx.stroke();
         }
-        ctx.closePath();
 
-        let currentAlpha = isHovered ? Math.min(0.85, opacity + 0.3) : opacity;
-        if (xaiMode === 'saliency' && (det.type.includes('OCP') || det.type.includes('Critical'))) {
-          currentAlpha = Math.min(0.75, opacity + 0.2);
+        // Draw Bounding Box
+        if (showBBoxes && det.bbox) {
+          const [bx, by, bw, bh] = det.bbox;
+          ctx.strokeStyle = hexToRgba(color, 0.8);
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([4, 4]);
+          ctx.strokeRect(bx, by, bw, bh);
+          ctx.setLineDash([]);
         }
 
-        ctx.fillStyle = hexToRgba(color, currentAlpha);
-        ctx.fill();
+        // Draw Class Label Banner
+        if (showLabels && det.bbox && !isHovered) {
+          const [bx, by] = det.bbox;
+          const labelText = `${det.class_name} ${(det.confidence * 100).toFixed(0)}%`;
 
-        ctx.strokeStyle = color;
-        ctx.lineWidth = isHovered ? 4 : 1.5;
-        ctx.stroke();
-      }
+          ctx.font = '500 13px "Inter", sans-serif';
+          const textWidth = ctx.measureText(labelText).width;
 
-      // 2. Draw Bounding Box
-      if (showBBoxes && det.bbox) {
-        const [bx, by, bw, bh] = det.bbox;
-        ctx.strokeStyle = hexToRgba(color, 0.8);
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([4, 4]);
-        ctx.strokeRect(bx, by, bw, bh);
-        ctx.setLineDash([]);
-      }
+          ctx.fillStyle = '#1c3a13';
+          ctx.fillRect(bx, Math.max(0, by - 22), textWidth + 14, 20);
 
-      // 3. Draw Class Label Banner
-      if (showLabels && det.bbox) {
-        const [bx, by] = det.bbox;
-        const labelText = `${det.class_name} ${(det.confidence * 100).toFixed(0)}%`;
-
-        ctx.font = '500 13px "Inter", sans-serif';
-        const textWidth = ctx.measureText(labelText).width;
-
-        ctx.fillStyle = '#1c3a13';
-        ctx.fillRect(bx, Math.max(0, by - 22), textWidth + 14, 20);
-
-        ctx.fillStyle = '#fcfcf7';
-        ctx.fillText(labelText, bx + 7, Math.max(14, by - 7));
-      }
-    });
+          ctx.fillStyle = '#fcfcf7';
+          ctx.fillText(labelText, bx + 7, Math.max(14, by - 7));
+        }
+      });
+    }
   };
 
   const hexToRgba = (hex, alpha) => {
@@ -211,7 +234,7 @@ export default function SegmentationCanvas({
       style={{
         position: 'relative',
         width: '100%',
-        minHeight: '680px',
+        minHeight: 'clamp(380px, 62vh, 680px)',
         backgroundColor: 'var(--color-warm-stone)',
         display: 'flex',
         alignItems: 'center',
@@ -236,7 +259,7 @@ export default function SegmentationCanvas({
         zIndex: 20
       }}>
         <button
-          className="btn-seed btn-seed-ghost"
+          className="btn-seed btn-seed-ghost micro-pill-interactive"
           onClick={() => setZoom(prev => Math.min(3.5, prev + 0.25))}
           title="Zoom In"
           style={{ padding: '6px', width: '32px', height: '32px' }}
@@ -244,7 +267,7 @@ export default function SegmentationCanvas({
           <ZoomIn size={15} />
         </button>
         <button
-          className="btn-seed btn-seed-ghost"
+          className="btn-seed btn-seed-ghost micro-pill-interactive"
           onClick={() => setZoom(prev => Math.max(0.5, prev - 0.25))}
           title="Zoom Out"
           style={{ padding: '6px', width: '32px', height: '32px' }}
@@ -252,7 +275,7 @@ export default function SegmentationCanvas({
           <ZoomOut size={15} />
         </button>
         <button
-          className="btn-seed btn-seed-ghost"
+          className="btn-seed btn-seed-ghost micro-pill-interactive"
           onClick={handleReset}
           title="Reset View"
           style={{ padding: '6px', width: '32px', height: '32px' }}
@@ -260,6 +283,47 @@ export default function SegmentationCanvas({
           <RotateCcw size={15} />
         </button>
       </div>
+
+      {/* Grad-CAM Thermal Colormap Spectrum Bar (Visible when Grad-CAM is Active) */}
+      {(xaiMode === 'gradcam' || xaiMode === 'composite') && (
+        <div style={{
+          position: 'absolute',
+          top: '16px',
+          left: '16px',
+          background: 'rgba(252, 252, 247, 0.95)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid var(--border-muted)',
+          borderRadius: '12px',
+          padding: '8px 14px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '5px',
+          zIndex: 20,
+          maxWidth: '280px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', fontWeight: 600, color: 'var(--color-forest-depths)' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <Sparkles size={12} color="#f59e0b" />
+              Grad-CAM Activation Spectrum
+            </span>
+            <span style={{ fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>JET</span>
+          </div>
+
+          {/* Thermal Gradient Bar */}
+          <div style={{
+            width: '100%',
+            height: '8px',
+            borderRadius: '4px',
+            background: 'linear-gradient(to right, #000080, #00ffff, #00ff00, #ffff00, #ff0000)'
+          }} />
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--color-pewter)', fontFamily: 'var(--font-seed-sans-mono)' }}>
+            <span>0.0 Background</span>
+            <span>0.5 Median</span>
+            <span style={{ color: '#dc2626', fontWeight: 600 }}>1.0 Peak Focus</span>
+          </div>
+        </div>
+      )}
 
       {/* Mode Indicator & Resolution Badge */}
       <div style={{
@@ -283,10 +347,10 @@ export default function SegmentationCanvas({
           {naturalSize.width} × {naturalSize.height} px · Zoom: {(zoom * 100).toFixed(0)}%
         </div>
 
-        {xaiMode === 'saliency' && (
+        {xaiMode !== 'segmentation' && (
           <div className="badge-lime">
             <Sparkles size={11} />
-            <span>Saliency Attention Overlay Active</span>
+            <span>Grad-CAM Overlay Active</span>
           </div>
         )}
       </div>
@@ -308,7 +372,7 @@ export default function SegmentationCanvas({
           flexDirection: 'column',
           gap: '3px',
           maxWidth: '240px',
-          boxShadow: 'none'
+          boxShadow: '0 4px 14px rgba(0,0,0,0.15)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
             <span style={{ fontWeight: 600 }}>{probeData.detection.class_name}</span>
@@ -337,7 +401,7 @@ export default function SegmentationCanvas({
           ref={canvasRef}
           style={{
             maxWidth: '100%',
-            maxHeight: '640px',
+            maxHeight: 'clamp(360px, 58vh, 640px)',
             objectFit: 'contain',
             borderRadius: '12px',
             boxShadow: 'none'

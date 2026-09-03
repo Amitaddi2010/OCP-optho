@@ -181,16 +181,7 @@ export default function LandingPage({
       {/* =========================================================================
           SECTION 1: THE CLINICAL PARADIGM & DRIBBBLE SPLIT-CURTAIN STAGE
           ========================================================================= */}
-      <section style={{
-        padding: '56px 40px 48px 40px',
-        maxWidth: '1580px',
-        margin: '0 auto',
-        width: '100%',
-        display: 'grid',
-        gridTemplateColumns: '1fr 1.25fr',
-        gap: '48px',
-        alignItems: 'center'
-      }}>
+      <section className="responsive-landing-hero">
         {/* Left Column: Editorial Headline & Interactive Triggers */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -472,7 +463,7 @@ export default function LandingPage({
           SECTION 2: SCIENTIFIC EVIDENCE & ELASTIC STAGING STEPPER
           ========================================================================= */}
       <section style={{
-        padding: '64px 40px 80px 40px',
+        padding: 'clamp(32px, 5vw, 64px) clamp(16px, 3vw, 40px)',
         maxWidth: '1580px',
         margin: '0 auto',
         width: '100%',
@@ -482,17 +473,18 @@ export default function LandingPage({
         borderTop: '1px solid var(--border-muted)'
       }}>
         {/* Section Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '12px' }}>
           <div>
             <span style={{ fontSize: '11px', fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)', textTransform: 'uppercase' }}>
               Scientific Validation & Explainability
             </span>
             <h2 style={{
-              fontSize: '36px',
+              fontSize: 'clamp(24px, 4vw, 36px)',
               fontWeight: 300,
               letterSpacing: '-0.54px',
               color: 'var(--color-forest-depths)',
-              marginTop: '4px'
+              marginTop: '4px',
+              margin: 0
             }}>
               Resolution trade-offs and clinical staging.
             </h2>
@@ -504,13 +496,8 @@ export default function LandingPage({
           </div>
         </div>
 
-        {/* 2-Card Comparative Matrix */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1.05fr 1fr',
-          gap: '32px',
-          alignItems: 'stretch'
-        }}>
+        {/* 2-Card Comparative Matrix (Responsive Grid) */}
+        <div className="responsive-evidence-grid">
           {/* MATRIX CARD A: 1280px Resolution Micro-Macro Trade-off Explorer */}
           <div className="seed-card micro-card-interactive" style={{
             padding: '28px',

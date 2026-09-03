@@ -364,6 +364,15 @@ export default function MenuBar({
                   <input type="range" min="0.1" max="1.0" step="0.05" value={opacity} onChange={(e) => setOpacity(parseFloat(e.target.value))} />
                 </div>
 
+                {/* Grad-CAM Opacity Slider */}
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
+                    <span style={{ color: 'var(--color-pewter)' }}>Grad-CAM Heatmap Opacity</span>
+                    <span style={{ fontFamily: 'var(--font-seed-sans-mono)', fontWeight: 500 }}>{((gradcamOpacity || 0.75) * 100).toFixed(0)}%</span>
+                  </div>
+                  <input type="range" min="0.1" max="1.0" step="0.05" value={gradcamOpacity || 0.75} onChange={(e) => setGradcamOpacity && setGradcamOpacity(parseFloat(e.target.value))} />
+                </div>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   <div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '4px' }}>
@@ -389,17 +398,24 @@ export default function MenuBar({
             <button
               onClick={() => setXaiMode('segmentation')}
               className={`btn-seed ${xaiMode === 'segmentation' ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
-              style={{ padding: '4px 12px', fontSize: '12px', border: 'none' }}
+              style={{ padding: '4px 10px', fontSize: '11px', border: 'none' }}
             >
-              Segmentation
+              Polygons
             </button>
             <button
-              onClick={() => setXaiMode('saliency')}
-              className={`btn-seed ${xaiMode === 'saliency' ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
-              style={{ padding: '4px 12px', fontSize: '12px', border: 'none' }}
+              onClick={() => setXaiMode('gradcam')}
+              className={`btn-seed ${xaiMode === 'gradcam' ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
+              style={{ padding: '4px 10px', fontSize: '11px', border: 'none' }}
             >
-              <Sparkles size={12} />
-              <span>Saliency Attention</span>
+              <Sparkles size={11} />
+              <span>Grad-CAM</span>
+            </button>
+            <button
+              onClick={() => setXaiMode('composite')}
+              className={`btn-seed ${xaiMode === 'composite' ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
+              style={{ padding: '4px 10px', fontSize: '11px', border: 'none' }}
+            >
+              <span>Composite</span>
             </button>
           </div>
 
@@ -407,9 +423,9 @@ export default function MenuBar({
       </div>
 
       {/* Right Action Buttons */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className="seed-menubar-actions" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <button
-          className="btn-seed btn-seed-inverted"
+          className="btn-seed btn-seed-inverted micro-pill-interactive"
           onClick={onOpenMetrics}
           style={{ padding: '7px 16px', fontSize: '12px' }}
         >
@@ -418,7 +434,7 @@ export default function MenuBar({
         </button>
 
         <button
-          className="btn-seed btn-seed-primary"
+          className="btn-seed btn-seed-primary micro-pill-interactive"
           onClick={onExportReport}
           style={{ padding: '7px 16px', fontSize: '12px' }}
         >

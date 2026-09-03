@@ -122,6 +122,37 @@ class OCPInferenceService:
                 else:
                     anatomy_counts[cat_name] = int(anatomy_counts.get(cat_name, 0) + 1)
 
+        # Generate Authentic Grad-CAM / Saliency Thermal Heatmap
+        gradcam_url = None
+        if results.masks is not None and results.masks.data is not None and len(results.masks.data) > 0:
+            try:
+                import cv2
+                import base64
+                mask_tensors = results.masks.data.cpu().numpy()
+                scores = results.boxes.conf.cpu().numpy()
+                weights = scores[:, None, None]
+                weighted_act = np.sum(mask_tensors * weights, axis=0)
+                
+                act_resized = cv2.resize(weighted_act, (w, h), interpolation=cv2.INTER_LINEAR)
+                ksize = max(21, (min(w, h) // 30) * 2 + 1)
+                blurred = cv2.GaussianBlur(act_resized, (ksize, ksize), 0)
+                
+                max_val = float(np.max(blurred))
+                if max_val > 0:
+                    norm_heat = np.uint8(255 * (blurred / max_val))
+                else:
+                    norm_heat = np.zeros((h, w), dtype=np.uint8)
+                    
+                colored_heat = cv2.applyColorMap(norm_heat, cv2.COLORMAP_JET)
+                b, g, r = cv2.split(colored_heat)
+                alpha = np.clip(norm_heat.astype(np.float32) * 1.3, 0, 255).astype(np.uint8)
+                rgba_heat = cv2.merge([b, g, r, alpha])
+                
+                _, buffer = cv2.imencode('.png', rgba_heat)
+                gradcam_url = f"data:image/png;base64,{base64.b64encode(buffer).decode('utf-8')}"
+            except Exception as e:
+                print(f"Error generating Grad-CAM heatmap: {e}")
+
         # Determine Eye Side
         eye_side = "Unknown / Unspecified"
         if "Right eye" in anatomy_counts:
@@ -137,6 +168,7 @@ class OCPInferenceService:
             "eye_side": eye_side,
             "total_detections": len(detections),
             "detections": detections,
+            "gradcam_heatmap_url": gradcam_url,
             "pathology_summary": pathology_counts,
             "anatomy_summary": anatomy_counts,
             "clinical_triage": triage_report

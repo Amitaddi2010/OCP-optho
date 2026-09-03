@@ -9,12 +9,18 @@ import {
   ChevronRight,
   Stethoscope,
   Activity,
-  Layers
+  Layers,
+  Sliders,
+  Flame
 } from 'lucide-react';
 
 export default function ExplainabilityPanel({
   predictionResult = null,
   loading = false,
+  xaiMode = 'segmentation',
+  setXaiMode = () => {},
+  gradcamOpacity = 0.75,
+  setGradcamOpacity = () => {},
   onHoverFeature = () => {},
   hoveredFeature = null,
   onExportReport = () => {}
@@ -31,7 +37,7 @@ export default function ExplainabilityPanel({
           animation: 'spin 0.9s linear infinite'
         }} />
         <span style={{ fontSize: '13px', color: 'var(--color-pewter)' }}>
-          Synthesizing AI feature attributions & Foster staging criteria...
+          Computing Grad-CAM gradient activations & Foster staging criteria...
         </span>
         <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
       </div>
@@ -46,13 +52,13 @@ export default function ExplainabilityPanel({
           Clinical Intelligence & Explainability
         </h4>
         <p style={{ fontSize: '13px', color: 'var(--color-pewter)', maxWidth: '320px', lineHeight: 1.5 }}>
-          Select a slit-lamp case from the menu bar to generate automated Foster staging, morphological feature attributions, and emergency alerts.
+          Select a slit-lamp case from the menu bar to generate automated Foster staging, Grad-CAM gradient activations, and emergency alerts.
         </p>
       </div>
     );
   }
 
-  const { clinical_triage, pathology_summary, eye_side, total_detections } = predictionResult;
+  const { clinical_triage, pathology_summary, eye_side, total_detections, gradcam_heatmap_url } = predictionResult;
   const stage = clinical_triage?.estimated_foster_stage || "Stage I / Early";
   const severity = clinical_triage?.clinical_severity || "Mild";
   const criticalAlerts = clinical_triage?.critical_alerts || [];
@@ -67,7 +73,7 @@ export default function ExplainabilityPanel({
       display: 'flex',
       flexDirection: 'column',
       gap: '20px',
-      background: 'var(--color-snow-white)'
+      backgroundColor: 'var(--color-snow-white)'
     }}>
       {/* Header: Stage and Severity */}
       <div style={{ borderBottom: '1px solid var(--border-muted)', paddingBottom: '16px' }}>
@@ -79,15 +85,93 @@ export default function ExplainabilityPanel({
             {severity}
           </span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
-          <h2 style={{ fontSize: '24px', fontWeight: 350, letterSpacing: '-0.4px', color: 'var(--color-forest-depths)', lineHeight: 1.2 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: 350, letterSpacing: '-0.4px', color: 'var(--color-forest-depths)', lineHeight: 1.2, margin: 0 }}>
             {stage}
           </h2>
           <span className="specimen-pill">{eye_side}</span>
         </div>
       </div>
 
-      {/* Module 1: AI Decision Attribution & Explainability */}
+      {/* Module 1: Grad-CAM Saliency Controls & How-To Guide */}
+      <div style={{
+        background: 'var(--color-warm-stone)',
+        borderRadius: '14px',
+        padding: '16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Flame size={16} color="#d97706" />
+            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-forest-depths)' }}>
+              Grad-CAM Activation Controls
+            </span>
+          </div>
+          <span style={{ fontSize: '10px', fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>
+            YOLO26 Feature Saliency
+          </span>
+        </div>
+
+        {/* Grad-CAM Mode Buttons (Micro-Interaction) */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px' }}>
+          <button
+            onClick={() => setXaiMode('segmentation')}
+            className={`btn-seed micro-pill-interactive ${xaiMode === 'segmentation' ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
+            style={{ padding: '6px 0', fontSize: '11px', justifyContent: 'center' }}
+          >
+            Polygons
+          </button>
+          <button
+            onClick={() => setXaiMode('gradcam')}
+            className={`btn-seed micro-pill-interactive ${xaiMode === 'gradcam' ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
+            style={{ padding: '6px 0', fontSize: '11px', justifyContent: 'center' }}
+          >
+            Grad-CAM
+          </button>
+          <button
+            onClick={() => setXaiMode('composite')}
+            className={`btn-seed micro-pill-interactive ${xaiMode === 'composite' ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
+            style={{ padding: '6px 0', fontSize: '11px', justifyContent: 'center' }}
+          >
+            Composite
+          </button>
+        </div>
+
+        {/* Grad-CAM Opacity Slider */}
+        {xaiMode !== 'segmentation' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', paddingTop: '4px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
+              <span style={{ color: 'var(--color-pewter)' }}>Thermal Heatmap Blend Intensity</span>
+              <span style={{ fontFamily: 'var(--font-seed-sans-mono)', fontWeight: 600 }}>{(gradcamOpacity * 100).toFixed(0)}%</span>
+            </div>
+            <input 
+              type="range" 
+              min="0.1" 
+              max="1.0" 
+              step="0.05" 
+              value={gradcamOpacity} 
+              onChange={(e) => setGradcamOpacity(parseFloat(e.target.value))} 
+            />
+          </div>
+        )}
+
+        {/* How to Use Grad-CAM Instructional Tooltip */}
+        <div style={{
+          background: 'var(--color-snow-white)',
+          padding: '10px 12px',
+          borderRadius: '10px',
+          fontSize: '11px',
+          color: 'var(--color-pewter)',
+          lineHeight: 1.45,
+          border: '1px solid var(--border-muted)'
+        }}>
+          <strong style={{ color: 'var(--color-forest-depths)' }}>How to use Grad-CAM:</strong> Toggle <em>Grad-CAM</em> to view spatial gradient activations. Red/amber peaks indicate the exact stromal textures and ductal borders that drove the model's confidence.
+        </div>
+      </div>
+
+      {/* Module 2: AI Decision Attribution & Explainability */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -146,7 +230,7 @@ export default function ExplainabilityPanel({
                   }} />
                 </div>
 
-                <div style={{ fontSize: '11px', color: 'var(--color-pewter)', lineHeight: 1.4, marginTop: '2px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--color-pewter)', lineHeight: 1.4 }}>
                   {attr.rationale}
                 </div>
               </div>
@@ -159,7 +243,7 @@ export default function ExplainabilityPanel({
         </div>
       </div>
 
-      {/* Module 2: Foster Staging Criteria Checklist */}
+      {/* Module 3: Foster Staging Criteria Checklist */}
       <div style={{
         background: 'var(--color-warm-stone)',
         borderRadius: '14px',
@@ -173,7 +257,7 @@ export default function ExplainabilityPanel({
             Foster Staging Validation
           </span>
           <span style={{ fontSize: '11px', fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>
-            [Clinical Staging Protocol]
+            [Clinical Protocol]
           </span>
         </div>
 
@@ -235,16 +319,15 @@ export default function ExplainabilityPanel({
         </div>
       )}
 
-      {/* Clinical Recommendations */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: 'auto' }}>
-        <span style={{ fontSize: '11px', fontFamily: 'var(--font-seed-sans-mono)', textTransform: 'uppercase', color: 'var(--color-forest-depths)' }}>
-          Clinical Action Directives:
-        </span>
-        <ul style={{ paddingLeft: '16px', fontSize: '12px', color: 'var(--color-pewter)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          {(clinical_triage?.recommendations || []).map((rec, i) => (
-            <li key={i}>{rec}</li>
-          ))}
-        </ul>
+      {/* Clinical Recommendations & Export Button */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: 'auto' }}>
+        <button
+          className="btn-seed btn-seed-primary micro-pill-interactive"
+          onClick={onExportReport}
+          style={{ width: '100%', padding: '12px' }}
+        >
+          <span>Export Formal Pathology Report</span>
+        </button>
       </div>
     </div>
   );
