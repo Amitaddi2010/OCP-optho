@@ -85,7 +85,8 @@ export default function ExplainabilityPanel({
     );
   }
 
-  const { clinical_triage, pathology_summary, anatomy_summary, eye_side, total_detections } = predictionResult;
+  const { clinical_triage, pathology_summary, anatomy_summary, total_detections } = predictionResult;
+  const eye_side = clinical_triage?.eye_side || predictionResult?.eye_side || "OD (Right Eye)";
   const stage = clinical_triage?.estimated_foster_stage || "Stage 0 (Non-Cicatricial / Preserved Anatomy)";
   const severity = clinical_triage?.clinical_severity || "Low / Baseline";
   const criticalAlerts = clinical_triage?.critical_alerts || [];
