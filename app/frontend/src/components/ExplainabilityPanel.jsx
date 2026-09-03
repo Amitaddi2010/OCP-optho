@@ -237,7 +237,7 @@ export default function ExplainabilityPanel({
             ))
           ) : (
             <span style={{ fontSize: '12px', color: 'var(--color-pewter)', fontStyle: 'italic' }}>
-              Baseline / non-cicatricial pattern: no dominant pathology striae identified.
+              Baseline / non-cicatricial pattern: analyzing anterior segment landmarks.
             </span>
           )}
         </div>
@@ -261,29 +261,45 @@ export default function ExplainabilityPanel({
           </span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {criteria.map((item, idx) => (
             <div
               key={idx}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '10px',
-                padding: '6px 10px',
-                borderRadius: '8px',
-                background: item.met ? 'var(--color-snow-white)' : 'transparent',
-                opacity: item.met ? 1 : 0.6
+                justifyContent: 'space-between',
+                padding: '8px 12px',
+                borderRadius: '10px',
+                background: item.met ? 'var(--color-snow-white)' : 'rgba(252, 252, 247, 0.4)',
+                border: item.met ? '1.5px solid var(--color-forest-depths)' : '1px solid transparent',
+                opacity: item.met ? 1 : 0.65,
+                transition: 'all 0.2s ease'
               }}
             >
-              {item.met ? (
-                <CheckCircle2 size={15} color="var(--color-forest-depths)" />
-              ) : (
-                <Circle size={15} color="var(--color-pewter)" />
-              )}
-              <div style={{ flex: 1, fontSize: '12px' }}>
-                <strong style={{ color: 'var(--color-forest-depths)', marginRight: '6px' }}>{item.stage}:</strong>
-                <span style={{ color: 'var(--color-pewter)' }}>{item.criterion}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {item.met ? (
+                  <CheckCircle2 size={16} color="var(--color-forest-depths)" />
+                ) : (
+                  <Circle size={15} color="var(--color-pewter)" />
+                )}
+                <div style={{ fontSize: '12px' }}>
+                  <strong style={{ color: 'var(--color-forest-depths)', marginRight: '6px' }}>{item.stage}:</strong>
+                  <span style={{ color: 'var(--color-pewter)' }}>{item.criterion}</span>
+                </div>
               </div>
+
+              <span style={{
+                fontSize: '10px',
+                fontFamily: 'var(--font-seed-sans-mono)',
+                padding: '2px 8px',
+                borderRadius: '1000px',
+                background: item.met ? 'var(--color-lime-pulse)' : 'transparent',
+                color: 'var(--color-forest-depths)',
+                fontWeight: 600
+              }}>
+                {item.met ? (item.stage === 'Stage 0' ? 'Intact / Normal' : 'Met / Present') : 'Negative'}
+              </span>
             </div>
           ))}
         </div>
