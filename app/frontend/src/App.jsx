@@ -182,48 +182,24 @@ export default function App() {
           {/* Main Clinical Dashboard — Exactly 2 Sections (Responsive Grid) */}
           <main className="responsive-dashboard-grid">
             {/* SECTION 1: Specimen Viewport & Diagnostic Canvas (Left / Top on Mobile) */}
-            <section style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%' }}>
+            <section style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
               <SegmentationCanvas 
                 imageSrc={currentImageSrc}
                 detections={predictionResult?.detections || []}
                 gradcamUrl={predictionResult?.gradcam_heatmap_url}
                 visibleCategories={visibleCategories}
                 opacity={opacity}
+                setOpacity={setOpacity}
                 gradcamOpacity={gradcamOpacity}
+                setGradcamOpacity={setGradcamOpacity}
                 brightness={brightness}
                 contrast={contrast}
-                showPolygons={showPolygons}
-                showBBoxes={showBBoxes}
-                showLabels={showLabels}
                 xaiMode={xaiMode}
+                setXaiMode={setXaiMode}
                 hoveredFeature={hoveredFeature}
                 hoveredDetId={hoveredDetId}
                 onHoverDetection={setHoveredDetId}
               />
-
-              {/* Section 1 Footer Status Bar */}
-              <div className="seed-card" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', flexWrap: 'wrap', gap: '8px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-forest-depths)' }} />
-                    <span style={{ fontWeight: 500, color: 'var(--color-forest-depths)' }}>OCP Pathology Striae</span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-sage-moss)' }} />
-                    <span style={{ fontWeight: 500, color: 'var(--color-forest-depths)' }}>Anatomical Landmarks</span>
-                  </div>
-                  {xaiMode !== 'segmentation' && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#dc2626' }} />
-                      <span style={{ fontWeight: 600, color: '#dc2626' }}>Grad-CAM Thermal Foci</span>
-                    </div>
-                  )}
-                </div>
-
-                <div style={{ fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>
-                  Active Delineations: <strong style={{ color: 'var(--color-forest-depths)' }}>{predictionResult?.total_detections || 0}</strong>
-                </div>
-              </div>
             </section>
 
             {/* SECTION 2: AI Explainability & Clinical Decision Support (Right / Bottom on Mobile) */}
@@ -232,9 +208,12 @@ export default function App() {
                 predictionResult={predictionResult}
                 loading={loading}
                 xaiMode={xaiMode}
-                setXaiMode={setXaiMode}
                 gradcamOpacity={gradcamOpacity}
                 setGradcamOpacity={setGradcamOpacity}
+                categories={modelInfo?.categories || []}
+                visibleCategories={visibleCategories}
+                onToggleCategory={handleToggleCategory}
+                palette={modelInfo?.palette || {}}
                 onHoverFeature={setHoveredFeature}
                 hoveredFeature={hoveredFeature}
                 onExportReport={handleExportReport}
