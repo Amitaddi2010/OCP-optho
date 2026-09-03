@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import LandingPage from './components/LandingPage';
 import MenuBar from './components/MenuBar';
 import SegmentationCanvas from './components/SegmentationCanvas';
 import ExplainabilityPanel from './components/ExplainabilityPanel';
 import PublicationMetricsModal from './components/PublicationMetricsModal';
 
 export default function App() {
+  const [currentView, setCurrentView] = useState('landing'); // 'landing' or 'workspace'
+
   const [modelInfo, setModelInfo] = useState(null);
   const [samples, setSamples] = useState([]);
   const [selectedSample, setSelectedSample] = useState(null);
@@ -46,7 +49,8 @@ export default function App() {
       .then(data => {
         if (data.samples && data.samples.length > 0) {
           setSamples(data.samples);
-          handleSelectSample(data.samples[0]);
+          setSelectedSample(data.samples[0]);
+          setCurrentImageSrc(data.samples[0].thumbnail_url);
         }
       })
       .catch(err => console.error("Error fetching samples:", err));
@@ -98,8 +102,15 @@ export default function App() {
     }
   };
 
+  // Run initial inference when switching to workspace if not yet predicted
   useEffect(() => {
-    if (selectedSample) {
+    if (currentView === 'workspace' && !predictionResult && selectedSample) {
+      runInference({ sample_filename: selectedSample.filename });
+    }
+  }, [currentView]);
+
+  useEffect(() => {
+    if (selectedSample && currentView === 'workspace') {
       runInference({ sample_filename: selectedSample.filename });
     }
   }, [confidence]);
@@ -127,91 +138,106 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--surface-canvas)' }}>
-      {/* Top Clinical Menu Bar */}
-      <MenuBar 
-        samples={samples}
-        selectedSample={selectedSample}
-        onSelectSample={handleSelectSample}
-        onFileUpload={handleFileUpload}
-        categories={modelInfo?.categories || []}
-        visibleCategories={visibleCategories}
-        onToggleCategory={handleToggleCategory}
-        onToggleGroup={handleToggleGroup}
-        opacity={opacity}
-        setOpacity={setOpacity}
-        brightness={brightness}
-        setBrightness={setBrightness}
-        contrast={contrast}
-        setContrast={setContrast}
-        confidence={confidence}
-        setConfidence={setConfidence}
-        xaiMode={xaiMode}
-        setXaiMode={setXaiMode}
-        onOpenMetrics={() => setMetricsModalOpen(true)}
-        onExportReport={handleExportReport}
-        palette={modelInfo?.palette || {}}
-      />
-
-      {/* Main Clinical Dashboard — Exactly 2 Sections */}
-      <main style={{
-        flex: 1,
-        padding: '24px 32px',
-        maxWidth: '1720px',
-        margin: '0 auto',
-        width: '100%',
-        display: 'grid',
-        gridTemplateColumns: '1.45fr 1fr',
-        gap: '24px',
-        alignItems: 'start'
-      }}>
-        {/* SECTION 1: Specimen Viewport & Diagnostic Canvas (Left) */}
-        <section style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <SegmentationCanvas 
-            imageSrc={currentImageSrc}
-            detections={predictionResult?.detections || []}
+      
+      {/* If Landing View, render the 2-section Landing Page */}
+      {currentView === 'landing' ? (
+        <LandingPage 
+          samples={samples}
+          onLaunchWorkspace={() => setCurrentView('workspace')}
+          onOpenMetrics={() => setMetricsModalOpen(true)}
+        />
+      ) : (
+        /* If Diagnostic Workspace, render the clean 2-section Diagnostic Dashboard */
+        <>
+          {/* Top Clinical Menu Bar */}
+          <MenuBar 
+            currentView={currentView}
+            onSwitchView={setCurrentView}
+            samples={samples}
+            selectedSample={selectedSample}
+            onSelectSample={handleSelectSample}
+            onFileUpload={handleFileUpload}
+            categories={modelInfo?.categories || []}
             visibleCategories={visibleCategories}
+            onToggleCategory={handleToggleCategory}
+            onToggleGroup={handleToggleGroup}
             opacity={opacity}
+            setOpacity={setOpacity}
             brightness={brightness}
+            setBrightness={setBrightness}
             contrast={contrast}
-            showPolygons={showPolygons}
-            showBBoxes={showBBoxes}
-            showLabels={showLabels}
+            setContrast={setContrast}
+            confidence={confidence}
+            setConfidence={setConfidence}
             xaiMode={xaiMode}
-            hoveredFeature={hoveredFeature}
-            hoveredDetId={hoveredDetId}
-            onHoverDetection={setHoveredDetId}
-          />
-
-          {/* Section 1 Footer Status Bar */}
-          <div className="seed-card" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-forest-depths)' }} />
-                <span style={{ fontWeight: 500, color: 'var(--color-forest-depths)' }}>OCP Pathology Striae</span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-sage-moss)' }} />
-                <span style={{ fontWeight: 500, color: 'var(--color-forest-depths)' }}>Anatomical Landmarks</span>
-              </div>
-            </div>
-
-            <div style={{ fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>
-              Active Delineations: <strong style={{ color: 'var(--color-forest-depths)' }}>{predictionResult?.total_detections || 0}</strong>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 2: AI Explainability & Clinical Decision Support (Right) */}
-        <section>
-          <ExplainabilityPanel 
-            predictionResult={predictionResult}
-            loading={loading}
-            onHoverFeature={setHoveredFeature}
-            hoveredFeature={hoveredFeature}
+            setXaiMode={setXaiMode}
+            onOpenMetrics={() => setMetricsModalOpen(true)}
             onExportReport={handleExportReport}
+            palette={modelInfo?.palette || {}}
           />
-        </section>
-      </main>
+
+          {/* Main Clinical Dashboard — Exactly 2 Sections */}
+          <main style={{
+            flex: 1,
+            padding: '24px 32px',
+            maxWidth: '1720px',
+            margin: '0 auto',
+            width: '100%',
+            display: 'grid',
+            gridTemplateColumns: '1.45fr 1fr',
+            gap: '24px',
+            alignItems: 'start'
+          }}>
+            {/* SECTION 1: Specimen Viewport & Diagnostic Canvas (Left) */}
+            <section style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <SegmentationCanvas 
+                imageSrc={currentImageSrc}
+                detections={predictionResult?.detections || []}
+                visibleCategories={visibleCategories}
+                opacity={opacity}
+                brightness={brightness}
+                contrast={contrast}
+                showPolygons={showPolygons}
+                showBBoxes={showBBoxes}
+                showLabels={showLabels}
+                xaiMode={xaiMode}
+                hoveredFeature={hoveredFeature}
+                hoveredDetId={hoveredDetId}
+                onHoverDetection={setHoveredDetId}
+              />
+
+              {/* Section 1 Footer Status Bar */}
+              <div className="seed-card" style={{ padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-forest-depths)' }} />
+                    <span style={{ fontWeight: 500, color: 'var(--color-forest-depths)' }}>OCP Pathology Striae</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-sage-moss)' }} />
+                    <span style={{ fontWeight: 500, color: 'var(--color-forest-depths)' }}>Anatomical Landmarks</span>
+                  </div>
+                </div>
+
+                <div style={{ fontFamily: 'var(--font-seed-sans-mono)', color: 'var(--color-pewter)' }}>
+                  Active Delineations: <strong style={{ color: 'var(--color-forest-depths)' }}>{predictionResult?.total_detections || 0}</strong>
+                </div>
+              </div>
+            </section>
+
+            {/* SECTION 2: AI Explainability & Clinical Decision Support (Right) */}
+            <section>
+              <ExplainabilityPanel 
+                predictionResult={predictionResult}
+                loading={loading}
+                onHoverFeature={setHoveredFeature}
+                hoveredFeature={hoveredFeature}
+                onExportReport={handleExportReport}
+              />
+            </section>
+          </main>
+        </>
+      )}
 
       {/* Publication Metrics & Cryptographic Audit Modal */}
       <PublicationMetricsModal 

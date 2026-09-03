@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 
 export default function MenuBar({
+  currentView = 'workspace',
+  onSwitchView = () => {},
   samples = [],
   selectedSample = null,
   onSelectSample = () => {},
@@ -75,7 +77,10 @@ export default function MenuBar({
     }}>
       {/* Brand & Wordmark */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div 
+          onClick={() => onSwitchView('landing')}
+          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
+        >
           <div style={{
             width: '32px',
             height: '32px',
@@ -101,6 +106,24 @@ export default function MenuBar({
           <span className="badge-lime" style={{ marginLeft: '4px' }}>
             Laboratory Glass
           </span>
+        </div>
+
+        {/* View Switcher Pill */}
+        <div style={{ display: 'flex', gap: '4px', background: 'var(--color-warm-stone)', padding: '3px', borderRadius: '1000px' }}>
+          <button
+            onClick={() => onSwitchView('landing')}
+            className={`btn-seed ${currentView === 'landing' ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
+            style={{ padding: '4px 12px', fontSize: '12px', border: 'none' }}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => onSwitchView('workspace')}
+            className={`btn-seed ${currentView === 'workspace' ? 'btn-seed-primary' : 'btn-seed-ghost'}`}
+            style={{ padding: '4px 12px', fontSize: '12px', border: 'none' }}
+          >
+            Diagnostic Console
+          </button>
         </div>
 
         {/* Clean Top Menu Items */}
