@@ -1,0 +1,257 @@
+import os
+
+BASE_DIR = r"e:\Amit Data\OCP_Detection"
+FIGURES_DIR = os.path.join(BASE_DIR, "reports", "figures")
+os.makedirs(FIGURES_DIR, exist_ok=True)
+
+def generate_svg_architecture_diagram():
+    svg_content = """<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 780" width="100%" height="100%">
+  <defs>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E3A8A" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+    <linearGradient id="pathologyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#991B1B" />
+      <stop offset="100%" stop-color="#DC2626" />
+    </linearGradient>
+    <linearGradient id="anatomyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#065F46" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="serveGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4C1D95" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+    
+    <filter id="subtleShadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.08" />
+    </filter>
+    
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#475569" />
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563EB" />
+    </marker>
+  </defs>
+
+  <style>
+    .title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 700; fill: #0F172A; }
+    .subtitle { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 13px; fill: #64748B; }
+    .stage-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 700; fill: #1E293B; letter-spacing: 0.5px; }
+    .node-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 13px; font-weight: 600; fill: #0F172A; }
+    .node-desc { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 11px; fill: #475569; line-height: 1.4; }
+    .badge { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 10px; font-weight: 700; fill: #FFFFFF; }
+    .node-box { fill: #FFFFFF; stroke: #E2E8F0; stroke-width: 1.5; rx: 8px; }
+    .stage-box { fill: #F8FAFC; stroke: #CBD5E1; stroke-width: 1.2; stroke-dasharray: 4 4; rx: 12px; }
+  </style>
+
+  <!-- Background Canvas -->
+  <rect width="1400" height="780" fill="#FFFFFF" />
+
+  <!-- Header -->
+  <text x="40" y="45" class="title">Figure 1: End-to-End OCP Detection &amp; Anatomy Instance Segmentation Pipeline</text>
+  <text x="40" y="68" class="subtitle">Unified Data Harmonization, Multi-Label Stratified Splitting, Model Training (YOLO26-Seg), and Clinical Inference Serving</text>
+  <line x1="40" y1="82" x2="1360" y2="82" stroke="#E2E8F0" stroke-width="1.5" />
+
+  <!-- ==================== STAGE 1 ==================== -->
+  <rect x="40" y="105" width="295" height="635" class="stage-box" />
+  <rect x="52" y="117" width="28" height="24" rx="4" fill="#1E3A8A" />
+  <text x="61" y="133" class="badge">01</text>
+  <text x="88" y="134" class="stage-title">DATA CLEANING &amp; HARMONIZATION</text>
+
+  <!-- Node 1A -->
+  <g filter="url(#subtleShadow)">
+    <rect x="55" y="160" width="265" height="110" class="node-box" />
+    <rect x="55" y="160" width="6" height="110" fill="#2563EB" rx="3" />
+    <text x="72" y="185" class="node-title">Project 2 (Pathology + Anatomy)</text>
+    <text x="72" y="205" class="node-desc">• 509 Slit-lamp Images (RGB/PNG)</text>
+    <text x="72" y="223" class="node-desc">• 5,857 Annotations | 23 Classes</text>
+    <text x="72" y="241" class="node-desc">• Deduplicated empty ID 49 entry</text>
+    <text x="72" y="259" class="node-desc">• Clamped 38 edge-clamped bboxes</text>
+  </g>
+
+  <!-- Node 1B -->
+  <g filter="url(#subtleShadow)">
+    <rect x="55" y="290" width="265" height="95" class="node-box" />
+    <rect x="55" y="290" width="6" height="95" fill="#059669" rx="3" />
+    <text x="72" y="315" class="node-title">Project 3 (Baseline Normal Anatomy)</text>
+    <text x="72" y="335" class="node-desc">• 86 Slit-lamp Images (1600×1200)</text>
+    <text x="72" y="353" class="node-desc">• 631 Annotations | 10 Classes</text>
+    <text x="72" y="371" class="node-desc">• Clamped 5 edge-clamped bboxes</text>
+  </g>
+
+  <!-- Node 1C -->
+  <g filter="url(#subtleShadow)">
+    <rect x="55" y="415" width="265" height="125" class="node-box" />
+    <rect x="55" y="415" width="6" height="125" fill="#DC2626" rx="3" />
+    <text x="72" y="440" class="node-title">Harmonization &amp; Image Normalization</text>
+    <text x="72" y="460" class="node-desc">• 3 RGBA PNGs converted to RGB JPEG</text>
+    <text x="72" y="478" class="node-desc">• Upper lid ↔ Upper eyelid</text>
+    <text x="72" y="496" class="node-desc">• Lower lid ↔ lower eyelid</text>
+    <text x="72" y="514" class="node-desc">• Casing &amp; Conjunctival canonical map</text>
+    <text x="72" y="532" class="node-desc">• Preserved source project metadata</text>
+  </g>
+
+  <!-- Node 1D: Merged Dataset -->
+  <g filter="url(#subtleShadow)">
+    <rect x="55" y="565" width="265" height="155" class="node-box" fill="#EFF6FF" stroke="#93C5FD" />
+    <rect x="55" y="565" width="6" height="155" fill="#1D4ED8" rx="3" />
+    <text x="72" y="590" class="node-title" fill="#1E3A8A">Unified Merged Dataset</text>
+    <text x="72" y="612" class="node-desc" font-weight="bold">595 Images | 6,488 Annotations</text>
+    <text x="72" y="632" class="node-desc">• 13 OCP Pathology Classes (4,888 ann)</text>
+    <text x="72" y="650" class="node-desc">• 10 Eye Anatomy Classes (1,600 ann)</text>
+    <text x="72" y="668" class="node-desc">• Polygon-level instance masks</text>
+    <text x="72" y="686" class="node-desc">• 0% corrupted files verified</text>
+  </g>
+
+  <!-- Arrow 1 to 2 -->
+  <path d="M 335 440 L 375 440" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- ==================== STAGE 2 ==================== -->
+  <rect x="380" y="105" width="295" height="635" class="stage-box" />
+  <rect x="392" y="117" width="28" height="24" rx="4" fill="#065F46" />
+  <text x="401" y="133" class="badge">02</text>
+  <text x="428" y="134" class="stage-title">MULTI-LABEL STRATIFICATION &amp; EXPORT</text>
+
+  <!-- Node 2A -->
+  <g filter="url(#subtleShadow)">
+    <rect x="395" y="160" width="265" height="135" class="node-box" />
+    <rect x="395" y="160" width="6" height="135" fill="#059669" rx="3" />
+    <text x="412" y="185" class="node-title">Iterative Multi-Label Stratification</text>
+    <text x="412" y="205" class="node-desc">• Ratio: 70% Train / 15% Val / 15% Test</text>
+    <text x="412" y="223" class="node-desc">• Guaranteed rare-class presence:</text>
+    <text x="422" y="241" class="node-desc">- Discharge (6 / 3 / 1)</text>
+    <text x="422" y="259" class="node-desc">- Perforated Cornea (8 / 2 / 2)</text>
+    <text x="422" y="277" class="node-desc">- Epithelial Defect (15 / 3 / 3)</text>
+  </g>
+
+  <!-- Node 2B: Splits -->
+  <g filter="url(#subtleShadow)">
+    <rect x="395" y="315" width="265" height="175" class="node-box" />
+    <text x="412" y="340" class="node-title">Stratified Dataset Partitions</text>
+    
+    <rect x="412" y="355" width="230" height="34" rx="4" fill="#F1F5F9" stroke="#E2E8F0" />
+    <text x="422" y="376" class="node-desc" font-weight="600">Train: 404 imgs (67.9%) | 4,355 masks</text>
+    
+    <rect x="412" y="398" width="230" height="34" rx="4" fill="#F1F5F9" stroke="#E2E8F0" />
+    <text x="422" y="419" class="node-desc" font-weight="600">Val: 96 imgs (16.1%) | 1,044 masks</text>
+    
+    <rect x="412" y="441" width="230" height="34" rx="4" fill="#F1F5F9" stroke="#E2E8F0" />
+    <text x="422" y="462" class="node-desc" font-weight="600">Test: 95 imgs (16.0%) | 1,089 masks</text>
+  </g>
+
+  <!-- Node 2C: Format Export -->
+  <g filter="url(#subtleShadow)">
+    <rect x="395" y="510" width="265" height="190" class="node-box" fill="#F0FDF4" stroke="#86EFAC" />
+    <rect x="395" y="510" width="6" height="190" fill="#16A34A" rx="3" />
+    <text x="412" y="535" class="node-title" fill="#065F46">Dataset Export Formatting</text>
+    
+    <text x="412" y="560" class="node-desc" font-weight="bold">YOLO26-Seg Training Configuration:</text>
+    <text x="422" y="578" class="node-desc">• Normalized polygon txt labels</text>
+    <text x="422" y="596" class="node-desc">• Ultralytics data.yaml (23 classes)</text>
+    <text x="422" y="614" class="node-desc">• Class-weighted loss modulation</text>
+    <text x="422" y="632" class="node-desc">• Configured for 1280px training resolution</text>
+  </g>
+
+  <!-- Arrow 2 to 3 -->
+  <path d="M 675 440 L 715 440" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- ==================== STAGE 3 ==================== -->
+  <rect x="720" y="105" width="295" height="635" class="stage-box" />
+  <rect x="732" y="117" width="28" height="24" rx="4" fill="#991B1B" />
+  <text x="741" y="133" class="badge">03</text>
+  <text x="768" y="134" class="stage-title">MODEL TRAINING &amp; EVALUATION</text>
+
+  <!-- Node 3A -->
+  <g filter="url(#subtleShadow)">
+    <rect x="735" y="160" width="265" height="135" class="node-box" />
+    <rect x="735" y="160" width="6" height="135" fill="#DC2626" rx="3" />
+    <text x="752" y="185" class="node-title">Class Imbalance Compensation</text>
+    <text x="752" y="205" class="node-desc">• Inverse Frequency Class Weighting</text>
+    <text x="752" y="223" class="node-desc">• Focal Loss (γ = 2.0, α_c weights)</text>
+    <text x="752" y="241" class="node-desc">• Multi-scale Color &amp; Geometric Jitter</text>
+    <text x="752" y="259" class="node-desc">• Copy-paste augmentation for small instances</text>
+  </g>
+
+  <!-- Node 3B -->
+  <g filter="url(#subtleShadow)">
+    <rect x="735" y="310" width="265" height="130" class="node-box" />
+    <text x="752" y="335" class="node-title">Model Training</text>
+    
+    <rect x="752" y="350" width="230" height="70" rx="4" fill="#EFF6FF" stroke="#BFDBFE" />
+    <text x="762" y="370" class="node-desc" font-weight="bold" fill="#1E40AF">YOLO26-Seg (CNN Backbone):</text>
+    <text x="762" y="388" class="node-desc">1280px high-resolution training</text>
+    <text x="762" y="406" class="node-desc">High-speed polygon proto-mask head</text>
+  </g>
+
+  <!-- Node 3C: Eval Harness -->
+  <g filter="url(#subtleShadow)">
+    <rect x="735" y="455" width="265" height="215" class="node-box" fill="#FFFBEB" stroke="#FDE68A" />
+    <rect x="735" y="455" width="6" height="215" fill="#D97706" rx="3" />
+    <text x="752" y="480" class="node-title" fill="#92400E">Comprehensive Evaluation Harness</text>
+    <text x="752" y="502" class="node-desc">• Per-class AP50, AP75, AP50:95 &amp; AR</text>
+    <text x="752" y="520" class="node-desc">• Pathology vs. Anatomy sub-metrics</text>
+    <text x="752" y="538" class="node-desc">• Computed True Confusion Matrices</text>
+    <text x="752" y="556" class="node-desc">• Strict JSON schema with SHA256 integrity</text>
+    <text x="752" y="574" class="node-desc">• Detailed small-instance (Class 1) logging</text>
+    <text x="752" y="592" class="node-desc">• Qualitative Visualizer (Easy/Hard/Fail)</text>
+  </g>
+
+  <!-- Arrow 3 to 4 -->
+  <path d="M 1015 440 L 1055 440" stroke="#475569" stroke-width="2" marker-end="url(#arrow)" />
+
+  <!-- ==================== STAGE 4 ==================== -->
+  <rect x="1060" y="105" width="300" height="635" class="stage-box" />
+  <rect x="1072" y="117" width="28" height="24" rx="4" fill="#4C1D95" />
+  <text x="1081" y="133" class="badge">04</text>
+  <text x="1108" y="134" class="stage-title">INFERENCE SERVING &amp; WEB APPLICATION</text>
+
+  <!-- Node 4A -->
+  <g filter="url(#subtleShadow)">
+    <rect x="1075" y="160" width="270" height="155" class="node-box" />
+    <rect x="1075" y="160" width="6" height="155" fill="#7C3AED" rx="3" />
+    <text x="1092" y="185" class="node-title">FastAPI Inference Service Backend</text>
+    <text x="1092" y="205" class="node-desc">• REST Endpoints: /predict, /info, /samples</text>
+    <text x="1092" y="223" class="node-desc">• Swappable Model Engine Architecture</text>
+    <text x="1092" y="241" class="node-desc">• Polygon coordinate vector serialization</text>
+    <text x="1092" y="259" class="node-desc">• Automated Clinical OCP Triage Engine:</text>
+    <text x="1102" y="277" class="node-desc">- Perforation &amp; LSCD Critical Alerts</text>
+    <text x="1102" y="295" class="node-desc">- Foster/Mondino Staging Estimation</text>
+  </g>
+
+  <!-- Node 4B -->
+  <g filter="url(#subtleShadow)">
+    <rect x="1075" y="330" width="270" height="220" class="node-box" fill="#FAF5FF" stroke="#DDD6FE" />
+    <rect x="1075" y="330" width="6" height="220" fill="#6D28D9" rx="3" />
+    <text x="1092" y="355" class="node-title" fill="#4C1D95">Next.js Clinical / Research Frontend</text>
+    <text x="1092" y="377" class="node-desc">• Interactive High-Res Canvas Overlay</text>
+    <text x="1092" y="395" class="node-desc">• Dual-Layer Toggles (Pathology vs Anatomy)</text>
+    <text x="1092" y="413" class="node-desc">• Per-class Confidence &amp; Opacity Sliders</text>
+    <text x="1092" y="431" class="node-desc">• Slit-lamp Contrast &amp; Beam Enhancer</text>
+    <text x="1092" y="449" class="node-desc">• Comprehensive Diagnostic Summary Card</text>
+    <text x="1092" y="467" class="node-desc">• Clinical PDF / JSON Report Generation</text>
+    <text x="1092" y="485" class="node-desc">• Built-in sample validation suite</text>
+  </g>
+
+  <!-- Node 4C: Publication Package -->
+  <g filter="url(#subtleShadow)">
+    <rect x="1075" y="565" width="270" height="155" class="node-box" />
+    <text x="1092" y="590" class="node-title">Journal Publication Submission</text>
+    <text x="1092" y="612" class="node-desc">• Structured Results Section Draft</text>
+    <text x="1092" y="630" class="node-desc">• Publication Tables (AP50, AP75, AP50:95)</text>
+    <text x="1092" y="648" class="node-desc">• High-Resolution Vector Figures (SVG/PNG)</text>
+    <text x="1092" y="666" class="node-desc">• Post-Merge Data Quality Audit Report</text>
+    <text x="1092" y="684" class="node-desc">• Full Code &amp; Model Reproducibility</text>
+  </g>
+</svg>
+"""
+    svg_path = os.path.join(FIGURES_DIR, "pipeline_architecture.svg")
+    with open(svg_path, 'w', encoding='utf-8') as f:
+        f.write(svg_content)
+    print(f"Generated Vector Architecture Diagram: {svg_path}")
+
+if __name__ == "__main__":
+    generate_svg_architecture_diagram()

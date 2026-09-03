@@ -1,0 +1,70 @@
+# ==============================================================================
+# DATASET (EXCLUDED AS REQUESTED)
+# ==============================================================================
+Dataset/
+Dataset/**
+*.zip
+*.tar
+*.tar.gz
+
+# ==============================================================================
+# LARGE INTERMEDIATE WEIGHTS & PRETRAINED BACKBONES
+# ==============================================================================
+yolo11s-seg.pt
+outputs/yolo_train/**/weights/epoch*.pt
+outputs/yolo_train/**/weights/last.pt
+weights/
+
+# Keep stripped release models in models/
+!models/best_yolo26_seg.pt
+!models/ocp_yolo26_seg_controlled_1280.pt
+!models/best_yolo26_seg_v2.pt
+
+# ==============================================================================
+# PYTHON & ENVIRONMENT
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+ENV/
+
+# ==============================================================================
+# FRONTEND / NODE
+# ==============================================================================
+node_modules/
+app/frontend/node_modules/
+app/frontend/dist/
+app/frontend/.vite/
+.npm
+.eslintcache
+
+# ==============================================================================
+# OS & IDE
+# ==============================================================================
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
